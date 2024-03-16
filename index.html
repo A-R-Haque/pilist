@@ -95,16 +95,11 @@
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
-
-    authDomain: "pilist.firebaseapp.com",
-
-    projectId: "pilist",
-
-    storageBucket: "pilist.appspot.com",
-
-    messagingSenderId: "785162211382",
-
-    appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
+            authDomain: "pilist.firebaseapp.com",
+            projectId: "pilist",
+            storageBucket: "pilist.appspot.com",
+            messagingSenderId: "785162211382",
+            appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
         };
 
         // Initialize Firebase
@@ -112,6 +107,12 @@
         const db = getFirestore(app);
 
         let currentList = 'urgent'; // Default list
+        const listsTasks = {
+            urgent: [],
+            list: [],
+            grocery: [],
+            misc: []
+        };
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.querySelectorAll('.list-btn').forEach(button => {
@@ -124,24 +125,24 @@
                 });
             });
 
-            // Select the default "urgent" button
             const defaultButton = document.querySelector('[data-list="urgent"]');
-            defaultButton.classList.add('selected'); // Add the 'selected' class
-            currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
-            await loadTasks(currentList); // Load the default "urgent" list tasks
+            defaultButton.classList.add('selected');
+            currentList = defaultButton.getAttribute('data-list');
+            await loadTasks(currentList);
         });
 
         document.getElementById('addTask').addEventListener('click', async function() {
             const newTaskValue = document.getElementById('newTask').value;
             if (newTaskValue.trim() !== '') {
-                addTask(newTaskValue, false, true); // removed await for consistency since addTask isn't async
+                addTask(newTaskValue, false, true);
                 document.getElementById('newTask').value = '';
             }
         });
 
         async function addTask(taskContent, crossedOff, save = false) {
             const tasksList = document.getElementById('tasksList');
-            const newTask = document.createElement('li');
+            const newTask
+ = document.createElement('li');
             newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
             const btnGroup = document.createElement('div');
             btnGroup.className = 'flex items-center mr-2';
@@ -175,16 +176,14 @@
                 save && saveTasks(currentList); // Save the tasks after toggling cross-off state
             });
 
-           const deleteBtn = createButton('Del', 'del-btn', function() {
-    lastDeletedTask = newTask.remove();
-    const index = Array.from(tasksList.children).indexOf(newTask);
-    if (index !== -1) {
-        tasks.splice(index, 1); // Remove the task from the tasks array
-        saveTasks(currentList); // Save the updated tasks list for the current list
-    }
-});
-
-
+            const deleteBtn = createButton('Del', 'del-btn', function() {
+                newTask.remove(); // Remove the task element from the DOM
+                const index = listsTasks[currentList].indexOf(taskContent); // Find the index of the task in the array
+                if (index !== -1) {
+                    listsTasks[currentList].splice(index, 1); // Remove the task from the array
+                    save && saveTasks(currentList); // Save the updated tasks list for the current list
+                }
+            });
 
             // Add text content and buttons to the task element
             const taskText = document.createElement('span');
@@ -201,33 +200,24 @@
 
             // Save tasks to Firestore if save flag is true
             if (save) {
-                await saveTasks(currentList);
+                listsTasks[currentList].push(taskContent); // Push the task content to the tasks array
+                await saveTasks(currentList); // Save the updated tasks list for the current list
             }
         }
 
         async function saveTasks(listName) {
-            const tasksList = document.getElementById('tasksList');
-            const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
-                return { 
-                    text: task.querySelector('.task-text').textContent,
-                    crossedOff: task.classList.contains('line-through') // Include cross-off state
-                };
-            });
-
-            // Save the array of tasks to a single document identified by listName
-            const listDocRef = doc(db, "lists", listName);
-            await setDoc(listDocRef, { tasks: tasks });
+            const listTasksRef = doc(db, "lists", listName);
+            await setDoc(listTasksRef, { tasks: listsTasks[listName] });
         }
 
         async function loadTasks(listName) {
-            const listDocRef = doc(db, "lists", listName);
-            const docSnap = await getDoc(listDocRef);
-
-            document.getElementById('tasksList').innerHTML = ''; // Clear current tasks
+            const listTasksRef = doc(db, "lists", listName);
+            const docSnap = await getDoc(listTasksRef);
 
             if (docSnap.exists()) {
-                docSnap.data().tasks.forEach(task => {
-                    addTask(task.text, task.crossedOff); // Pass cross-off state to addTask function
+                listsTasks[listName] = docSnap.data().tasks;
+                listsTasks[listName].forEach(task => {
+                    addTask(task, false); // Pass cross-off state to addTask function
                 });
             } else {
                 console.log("No such document!");
