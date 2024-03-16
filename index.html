@@ -134,15 +134,14 @@
         document.getElementById('addTask').addEventListener('click', async function() {
             const newTaskValue = document.getElementById('newTask').value;
             if (newTaskValue.trim() !== '') {
-                addTask(newTaskValue, false, true);
+                addTask({ text: newTaskValue }, false, true); // Wrap newTaskValue in an object
                 document.getElementById('newTask').value = '';
             }
         });
 
         async function addTask(taskContent, crossedOff, save = false) {
             const tasksList = document.getElementById('tasksList');
-            const newTask
- = document.createElement('li');
+            const newTask = document.createElement('li');
             newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
             const btnGroup = document.createElement('div');
             btnGroup.className = 'flex items-center mr-2';
@@ -178,7 +177,7 @@
 
             const deleteBtn = createButton('Del', 'del-btn', function() {
                 newTask.remove(); // Remove the task element from the DOM
-                const index = listsTasks[currentList].indexOf(taskContent); // Find the index of the task in the array
+                const index = listsTasks[currentList].indexOf(taskContent.text); // Find the index of the task in the array
                 if (index !== -1) {
                     listsTasks[currentList].splice(index, 1); // Remove the task from the array
                     save && saveTasks(currentList); // Save the updated tasks list for the current list
@@ -187,7 +186,7 @@
 
             // Add text content and buttons to the task element
             const taskText = document.createElement('span');
-            taskText.textContent = taskContent;
+            taskText.textContent = taskContent.text; // Access 'text' property of taskContent object
             taskText.className = 'task-text';
             btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
             newTask.append(btnGroup, taskText);
@@ -200,7 +199,7 @@
 
             // Save tasks to Firestore if save flag is true
             if (save) {
-                listsTasks[currentList].push(taskContent); // Push the task content to the tasks array
+                listsTasks[currentList].push(taskContent.text); // Push the task content to the tasks array
                 await saveTasks(currentList); // Save the updated tasks list for the current list
             }
         }
@@ -217,7 +216,7 @@
             if (docSnap.exists()) {
                 listsTasks[listName] = docSnap.data().tasks;
                 listsTasks[listName].forEach(task => {
-                    addTask(task, false); // Pass cross-off state to addTask function
+                    addTask({ text: task }, false); // Pass cross-off state to addTask function
                 });
             } else {
                 console.log("No such document!");
