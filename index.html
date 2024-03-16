@@ -67,6 +67,8 @@
             flex-grow: 1;
             margin-left: 10px;
         }
+        /* Resizing pi.gif */
+       
     </style>
 </head>
 <body>
@@ -111,24 +113,23 @@
         let lastDeletedIndex;
         
 
-      document.addEventListener('DOMContentLoaded', async function() {
-          document.querySelectorAll('.list-btn').forEach(button => {
-              button.addEventListener('click', async function() {
-                  document.querySelectorAll('.list-btn').forEach(btn => btn.classList.remove('selected'));
-                  this.classList.add('selected');
-                  currentList = this.getAttribute('data-list');
-                  document.getElementById('tasksList').innerHTML = '';
-                  await loadTasks(currentList);
-              });
-          });
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.querySelectorAll('.list-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    document.querySelectorAll('.list-btn').forEach(btn => btn.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentList = this.getAttribute('data-list');
+                    document.getElementById('tasksList').innerHTML = '';
+                    await loadTasks(currentList);
+                });
+            });
 
-          // Select the default "urgent" button
-          const defaultButton = document.querySelector('[data-list="urgent"]');
-          defaultButton.classList.add('selected'); // Add the 'selected' class
-          currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
-          await loadTasks(currentList); // Load the default "urgent" list tasks
-      });
-      
+            // Select the default "urgent" button
+            const defaultButton = document.querySelector('[data-list="urgent"]');
+            defaultButton.classList.add('selected'); // Add the 'selected' class
+            currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
+            await loadTasks(currentList); // Load the default "urgent" list tasks
+        });
 
         document.getElementById('addTask').addEventListener('click', async function() {
             const newTaskValue = document.getElementById('newTask').value;
@@ -169,13 +170,15 @@
                 }
             });
 
-            const crossOffBtn = createButton('X', 'x-btn', function() {
+            const crossOffBtn = createButton('X', 'x-btn', function()
+{
                 newTask.classList.toggle('line-through');
-                save && saveTasks(currentList);            });
+                save && saveTasks(currentList); // Save the tasks after toggling cross-off state
+            });
 
             const deleteBtn = createButton('Del', 'del-btn', function() {
                 lastDeletedTask = newTask.remove();
-                saveTasks(currentList);
+                saveTasks(currentList); // Assume we always want to save the state after a delete.
             });
 
             // Add text content and buttons to the task element
@@ -200,7 +203,7 @@
         async function saveTasks(listName) {
             const tasksList = document.getElementById('tasksList');
             const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
-                return {
+                return { 
                     text: task.querySelector('.task-text').textContent,
                     crossedOff: task.classList.contains('line-through') // Include cross-off state
                 };
