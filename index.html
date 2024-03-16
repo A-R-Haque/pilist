@@ -8,7 +8,7 @@
     <link rel="icon" type="image/x-icon" href="pi1.ico">
     <style>
         body {
-            background-color: aliceblue;
+            background-color: silver;
         }
         .btn {
             width: 30px;
@@ -19,33 +19,32 @@
             padding: 0;
         }
         .list-btn {
-            border: 2px solid black;
-            color: green;
-            background-color: yellow;
+            border: 1px solid black;
+            color: white;
+            background-color: gray;
         }
         .list-btn.selected {
             background-color: darkorange;
             color: black;
         }
         .add-btn {
-            border: 2px solid black;
-            background-color: darkcyan;
-            color: yellow;
+            background-color: black;
+            color: white;
         }
         .up-dn-btn {
             background-color: lightblue;
-            border: 2px solid black;
-            color: black;
+            border: 1px solid black;
+            color: white;
         }
         .x-btn {
             background-color: lightgreen;
             color: black;
-            border: 2px solid black;
+            border: 1px solid black;
         }
         .del-btn {
             background-color: red;
             color: black;
-            border: 2px solid black;
+            border: 1px solid black;
         }
         #tasksList {
             list-style-type: none;
@@ -67,18 +66,17 @@
             flex-grow: 1;
             margin-left: 10px;
         }
-        /* Resizing pi.gif */
-       
     </style>
 </head>
 <body>
     <div class="container mx-auto p-4 text-center">
-        <img src="pi.gif" alt="Pi" class="mx-auto mb-4">
+        <img src="pi.gif" alt="pi" class="mx-auto mb-4">
         <div class="flex justify-center gap-2 mb-4">
-            <button class="list-btn py-2 px-4 rounded" data-list="urgent">Urgent</button>
-            <button class="list-btn py-2 px-4 rounded" data-list="list">List</button>
-            <button class="list-btn py-2 px-4 rounded" data-list="grocery">Grocery</button>
-            <button class="list-btn py-2 px-4 rounded" data-list="misc">Misc</button>
+            <button class="list-btn py-2 px-4 rounded" data-list="work">Work</button>
+            <button class="list-btn py-2 px-4 rounded" data-list="personal">Personal</button>
+            <button class="list-btn py-2 px-4 rounded" data-list="research">Research</button>
+            <button class="list-btn py-2 px-4 rounded" data-list="a">A</button>
+            <button class="list-btn py-2 px-4 rounded" data-list="b">B</button>
         </div>
         <div class="mb-4">
             <input type="text" id="newTask" placeholder="Add new task" class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -96,7 +94,7 @@
 
         // Firebase configuration
         const firebaseConfig = {
-           apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
+              apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
 
     authDomain: "pilist.firebaseapp.com",
 
@@ -109,13 +107,17 @@
     appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
 
 
+
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let currentList = 'urgent'; // Default list
+        let currentList = 'work'; // Default list
+        let lastDeletedTask;
+        let lastDeletedIndex;
+        
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.querySelectorAll('.list-btn').forEach(button => {
@@ -127,116 +129,119 @@
                     await loadTasks(currentList);
                 });
             });
-
-            // Select the default "urgent" button
-            const defaultButton = document.querySelector('[data-list="urgent"]');
-            defaultButton.classList.add('selected'); // Add the 'selected' class
-            currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
-            await loadTasks(currentList); // Load the default "urgent" list tasks
+            
+            await loadTasks(currentList); // Load the default "work" list tasks
         });
+        document.addEventListener('DOMContentLoaded', async function() {
+    const workButton = document.querySelector('[data-list="work"]');
+    workButton.classList.add('selected'); // Add 'selected' class to indicate it's pressed by default
+    await loadTasks('work'); // Load the "Work" list by default
+});
+
+// Rest of your code...
+
+
 
         document.getElementById('addTask').addEventListener('click', async function() {
-            const new
-document.getElementById('addTask').addEventListener('click', async function() {
-    const newTaskValue = document.getElementById('newTask').value;
-    if (newTaskValue.trim() !== '') {
-        addTask(newTaskValue, false, true); // removed await for consistency since addTask isn't async
-        document.getElementById('newTask').value = '';
-    }
-});
-
-async function addTask(taskContent, crossedOff, save = false) {
-    const tasksList = document.getElementById('tasksList');
-    const newTask = document.createElement('li');
-    newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
-    const btnGroup = document.createElement('div');
-    btnGroup.className = 'flex items-center mr-2';
-
-    // Function to create a button
-    function createButton(text, classes, onClick) {
-        const button = document.createElement('button');
-        button.textContent = text;
-        button.className = `btn ${classes}`;
-        button.addEventListener('click', onClick);
-        return button;
-    }
-
-    // Create Up, Down, Cross-off, and Delete buttons
-    const moveUpBtn = createButton('Up', 'up-dn-btn', function() {
-        if (newTask.previousElementSibling) {
-            tasksList.insertBefore(newTask, newTask.previousElementSibling);
-            save && saveTasks(currentList);
-        }
-    });
-
-    const moveDownBtn = createButton('Dn', 'up-dn-btn', function() {
-        if (newTask.nextElementSibling) {
-            tasksList.insertBefore(newTask.nextElementSibling, newTask);
-            save && saveTasks(currentList);
-        }
-    });
-
-    const crossOffBtn = createButton('X', 'x-btn', function() {
-        newTask.classList.toggle('line-through');
-        save && saveTasks(currentList); // Save the tasks after toggling cross-off state
-    });
-
-    const deleteBtn = createButton('Del', 'del-btn', function() {
-        lastDeletedTask = newTask.remove();
-        saveTasks(currentList); // Assume we always want to save the state after a delete.
-    });
-
-    // Add text content and buttons to the task element
-    const taskText = document.createElement('span');
-    taskText.textContent = taskContent;
-    taskText.className = 'task-text';
-    btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
-    newTask.append(btnGroup, taskText);
-    tasksList.appendChild(newTask);
-
-    // Apply the cross-off state if passed in
-    if (crossedOff) {
-        newTask.classList.add('line-through');
-    }
-
-    // Save tasks to Firestore if save flag is true
-    if (save) {
-        await saveTasks(currentList);
-    }
-}
-
-async function saveTasks(listName) {
-    const tasksList = document.getElementById('tasksList');
-    const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
-        return { 
-            text: task.querySelector('.task-text').textContent,
-            crossedOff: task.classList.contains('line-through') // Include cross-off state
-        };
-    });
-
-    // Save the array of tasks to a single document identified by listName
-    const listDocRef = doc(db, "lists", listName);
-    await setDoc(listDocRef, { tasks: tasks });
-}
-
-async function loadTasks(listName) {
-    const listDocRef = doc(db, "lists", listName);
-    const docSnap = await getDoc(listDocRef);
-
-    document.getElementById('tasksList').innerHTML = ''; // Clear current tasks
-
-    if (docSnap.exists()) {
-        docSnap.data().tasks.forEach(task => {
-            addTask(task.text, task.crossedOff); // Pass cross-off state to addTask function
+            const newTaskValue = document.getElementById('newTask').value;
+            if (newTaskValue.trim() !== '') {
+                addTask(newTaskValue, false, true); // removed await for consistency since addTask isn't async
+                document.getElementById('newTask').value = '';
+            }
         });
-    } else {
-        console.log("No such document!");
-    }
-}
 
-window.addEventListener('beforeunload', async function(event) {
-    await saveTasks(currentList);
-});
-</script>
+        async function addTask(taskContent, crossedOff, save = false) {
+            const tasksList = document.getElementById('tasksList');
+            const newTask = document.createElement('li');
+            newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'flex items-center mr-2';
+
+            // Function to create a button
+            function createButton(text, classes, onClick) {
+                const button = document.createElement('button');
+                button.textContent = text;
+                button.className = `btn ${classes}`;
+                button.addEventListener('click', onClick);
+                return button;
+            }
+
+            // Create Up, Down, Cross-off, and Delete buttons
+            const moveUpBtn = createButton('Up', 'up-dn-btn', function() {
+                if (newTask.previousElementSibling) {
+                    tasksList.insertBefore(newTask, newTask.previousElementSibling);
+                    save && saveTasks(currentList);
+                }
+            });
+
+            const moveDownBtn = createButton('Dn', 'up-dn-btn', function() {
+                if (newTask.nextElementSibling) {
+                    tasksList.insertBefore(newTask.nextElementSibling, newTask);
+                    save && saveTasks(currentList);
+                }
+            });
+
+            const crossOffBtn = createButton('X', 'x-btn', function() {
+                newTask.classList.toggle('line-through');
+                save && saveTasks(currentList); // Save the tasks after toggling cross-off state
+            });
+
+            const deleteBtn = createButton('Del', 'del-btn', function() {
+                lastDeletedTask =                 newTask.remove();
+                saveTasks(currentList); // Assume we always want to save the state after a delete.
+            });
+
+            // Add text content and buttons to the task element
+            const taskText = document.createElement('span');
+            taskText.textContent = taskContent;
+            taskText.className = 'task-text';
+            btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
+            newTask.append(btnGroup, taskText);
+            tasksList.appendChild(newTask);
+
+            // Apply the cross-off state if passed in
+            if (crossedOff) {
+                newTask.classList.add('line-through');
+            }
+
+            // Save tasks to Firestore if save flag is true
+            if (save) {
+                await saveTasks(currentList);
+            }
+        }
+
+        async function saveTasks(listName) {
+            const tasksList = document.getElementById('tasksList');
+            const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
+                return { 
+                    text: task.querySelector('.task-text').textContent,
+                    crossedOff: task.classList.contains('line-through') // Include cross-off state
+                };
+            });
+
+            // Save the array of tasks to a single document identified by listName
+            const listDocRef = doc(db, "lists", listName);
+            await setDoc(listDocRef, { tasks: tasks });
+        }
+
+        async function loadTasks(listName) {
+            const listDocRef = doc(db, "lists", listName);
+            const docSnap = await getDoc(listDocRef);
+
+            document.getElementById('tasksList').innerHTML = ''; // Clear current tasks
+
+            if (docSnap.exists()) {
+                docSnap.data().tasks.forEach(task => {
+                    addTask(task.text, task.crossedOff); // Pass cross-off state to addTask function
+                });
+            } else {
+                console.log("No such document!");
+            }
+        }
+
+        window.addEventListener('beforeunload', async function(event) {
+            await saveTasks(currentList);
+        });
+    </script>
 </body>
 </html>
