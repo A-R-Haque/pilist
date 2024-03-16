@@ -180,9 +180,10 @@
     const index = Array.from(tasksList.children).indexOf(newTask);
     if (index !== -1) {
         tasks.splice(index, 1); // Remove the task from the tasks array
-        saveTasks(currentList); // Save the updated tasks list
+        saveTasks(currentList); // Save the updated tasks list for the current list
     }
 });
+
 
 
             // Add text content and buttons to the task element
