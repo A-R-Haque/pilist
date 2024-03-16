@@ -109,9 +109,6 @@
         const db = getFirestore(app);
 
         let currentList = 'urgent'; // Default list
-        let lastDeletedTask;
-        let lastDeletedIndex;
-        
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.querySelectorAll('.list-btn').forEach(button => {
@@ -165,13 +162,13 @@
 
             const moveDownBtn = createButton('Dn', 'up-dn-btn', function() {
                 if (newTask.nextElementSibling) {
-                    tasksList.insertBefore(newTask.nextElementSibling, newTask);
+                    tasksList.insertBefore(newTask.nextElement
+Sibling, newTask);
                     save && saveTasks(currentList);
                 }
             });
 
-            const crossOffBtn = createButton('X', 'x-btn', function()
-{
+            const crossOffBtn = createButton('X', 'x-btn', function() {
                 newTask.classList.toggle('line-through');
                 save && saveTasks(currentList); // Save the tasks after toggling cross-off state
             });
@@ -229,7 +226,7 @@
             }
         }
 
-        window.addEventListener('beforeunload', async function(event) {
+        window.addEventListener('unload', async function(event) {
             await saveTasks(currentList);
         });
     </script>
