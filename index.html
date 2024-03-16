@@ -94,14 +94,21 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
-            authDomain: "pilist.firebaseapp.com",
-            projectId: "pilist",
-            storageBucket: "pilist.appspot.com",
-            messagingSenderId: "785162211382",
-            appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
+           apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
+
+    authDomain: "pilist.firebaseapp.com",
+
+    projectId: "pilist",
+
+    storageBucket: "pilist.appspot.com",
+
+    messagingSenderId: "785162211382",
+
+    appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
+
+
         };
 
         // Initialize Firebase
@@ -129,106 +136,107 @@
         });
 
         document.getElementById('addTask').addEventListener('click', async function() {
-            const newTaskValue = document.getElementById('newTask').value;
-            if (newTaskValue.trim() !== '') {
-                addTask(newTaskValue, false, true); // removed await for consistency since addTask isn't async
-                document.getElementById('newTask').value = '';
-            }
+            const new
+document.getElementById('addTask').addEventListener('click', async function() {
+    const newTaskValue = document.getElementById('newTask').value;
+    if (newTaskValue.trim() !== '') {
+        addTask(newTaskValue, false, true); // removed await for consistency since addTask isn't async
+        document.getElementById('newTask').value = '';
+    }
+});
+
+async function addTask(taskContent, crossedOff, save = false) {
+    const tasksList = document.getElementById('tasksList');
+    const newTask = document.createElement('li');
+    newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
+    const btnGroup = document.createElement('div');
+    btnGroup.className = 'flex items-center mr-2';
+
+    // Function to create a button
+    function createButton(text, classes, onClick) {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.className = `btn ${classes}`;
+        button.addEventListener('click', onClick);
+        return button;
+    }
+
+    // Create Up, Down, Cross-off, and Delete buttons
+    const moveUpBtn = createButton('Up', 'up-dn-btn', function() {
+        if (newTask.previousElementSibling) {
+            tasksList.insertBefore(newTask, newTask.previousElementSibling);
+            save && saveTasks(currentList);
+        }
+    });
+
+    const moveDownBtn = createButton('Dn', 'up-dn-btn', function() {
+        if (newTask.nextElementSibling) {
+            tasksList.insertBefore(newTask.nextElementSibling, newTask);
+            save && saveTasks(currentList);
+        }
+    });
+
+    const crossOffBtn = createButton('X', 'x-btn', function() {
+        newTask.classList.toggle('line-through');
+        save && saveTasks(currentList); // Save the tasks after toggling cross-off state
+    });
+
+    const deleteBtn = createButton('Del', 'del-btn', function() {
+        lastDeletedTask = newTask.remove();
+        saveTasks(currentList); // Assume we always want to save the state after a delete.
+    });
+
+    // Add text content and buttons to the task element
+    const taskText = document.createElement('span');
+    taskText.textContent = taskContent;
+    taskText.className = 'task-text';
+    btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
+    newTask.append(btnGroup, taskText);
+    tasksList.appendChild(newTask);
+
+    // Apply the cross-off state if passed in
+    if (crossedOff) {
+        newTask.classList.add('line-through');
+    }
+
+    // Save tasks to Firestore if save flag is true
+    if (save) {
+        await saveTasks(currentList);
+    }
+}
+
+async function saveTasks(listName) {
+    const tasksList = document.getElementById('tasksList');
+    const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
+        return { 
+            text: task.querySelector('.task-text').textContent,
+            crossedOff: task.classList.contains('line-through') // Include cross-off state
+        };
+    });
+
+    // Save the array of tasks to a single document identified by listName
+    const listDocRef = doc(db, "lists", listName);
+    await setDoc(listDocRef, { tasks: tasks });
+}
+
+async function loadTasks(listName) {
+    const listDocRef = doc(db, "lists", listName);
+    const docSnap = await getDoc(listDocRef);
+
+    document.getElementById('tasksList').innerHTML = ''; // Clear current tasks
+
+    if (docSnap.exists()) {
+        docSnap.data().tasks.forEach(task => {
+            addTask(task.text, task.crossedOff); // Pass cross-off state to addTask function
         });
+    } else {
+        console.log("No such document!");
+    }
+}
 
-        async function addTask(taskContent, crossedOff, save = false) {
-            const tasksList = document.getElementById('tasksList');
-            const newTask = document.createElement('li');
-            newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
-            const btnGroup = document.createElement('div');
-            btnGroup.className = 'flex items-center mr-2';
-
-            // Function to create a button
-            function createButton(text, classes, onClick) {
-                const button = document.createElement('button');
-                button.textContent = text;
-                button.className = `btn ${classes}`;
-                button.addEventListener('click', onClick);
-                return button;
-            }
-
-            // Create Up, Down, Cross-off, and Delete buttons
-            const moveUpBtn = createButton('Up', 'up-dn-btn', function() {
-                if (newTask.previousElementSibling) {
-                    tasksList.insertBefore(newTask, newTask.previousElementSibling);
-                    save && saveTasks(currentList);
-                }
-            });
-
-            const moveDownBtn = createButton('Dn', 'up-dn-btn', function() {
-                if (newTask.nextElementSibling) {
-                    tasksList.insertBefore(newTask.nextElement
-Sibling, newTask);
-                    save && saveTasks(currentList);
-                }
-            });
-
-            const crossOffBtn = createButton('X', 'x-btn', function() {
-                newTask.classList.toggle('line-through');
-                save && saveTasks(currentList); // Save the tasks after toggling cross-off state
-            });
-
-            const deleteBtn = createButton('Del', 'del-btn', function() {
-                lastDeletedTask = newTask.remove();
-                saveTasks(currentList); // Assume we always want to save the state after a delete.
-            });
-
-            // Add text content and buttons to the task element
-            const taskText = document.createElement('span');
-            taskText.textContent = taskContent;
-            taskText.className = 'task-text';
-            btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
-            newTask.append(btnGroup, taskText);
-            tasksList.appendChild(newTask);
-
-            // Apply the cross-off state if passed in
-            if (crossedOff) {
-                newTask.classList.add('line-through');
-            }
-
-            // Save tasks to Firestore if save flag is true
-            if (save) {
-                await saveTasks(currentList);
-            }
-        }
-
-        async function saveTasks(listName) {
-            const tasksList = document.getElementById('tasksList');
-            const tasks = Array.from(tasksList.querySelectorAll('li')).map(task => {
-                return { 
-                    text: task.querySelector('.task-text').textContent,
-                    crossedOff: task.classList.contains('line-through') // Include cross-off state
-                };
-            });
-
-            // Save the array of tasks to a single document identified by listName
-            const listDocRef = doc(db, "lists", listName);
-            await setDoc(listDocRef, { tasks: tasks });
-        }
-
-        async function loadTasks(listName) {
-            const listDocRef = doc(db, "lists", listName);
-            const docSnap = await getDoc(listDocRef);
-
-            document.getElementById('tasksList').innerHTML = ''; // Clear current tasks
-
-            if (docSnap.exists()) {
-                docSnap.data().tasks.forEach(task => {
-                    addTask(task.text, task.crossedOff); // Pass cross-off state to addTask function
-                });
-            } else {
-                console.log("No such document!");
-            }
-        }
-
-        window.addEventListener('unload', async function(event) {
-            await saveTasks(currentList);
-        });
-    </script>
+window.addEventListener('beforeunload', async function(event) {
+    await saveTasks(currentList);
+});
+</script>
 </body>
 </html>
