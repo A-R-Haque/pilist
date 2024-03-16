@@ -67,8 +67,6 @@
             flex-grow: 1;
             margin-left: 10px;
         }
-        /* Resizing pi.gif */
-       
     </style>
 </head>
 <body>
@@ -94,29 +92,14 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-        // Firebase configuration
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-             <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyD5J79NeD0oG4BKqOqbZTZL-ago5L2tBcw",
-    authDomain: "pilist.firebaseapp.com",
-    projectId: "pilist",
-    storageBucket: "pilist.appspot.com",
-    messagingSenderId: "785162211382",
-    appId: "1:785162211382:web:ab4461e1034e82cf9dc897"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
-
-
+            apiKey: "your-api-key",
+            authDomain: "your-auth-domain",
+            projectId: "your-project-id",
+            storageBucket: "your-storage-bucket",
+            messagingSenderId: "your-messaging-sender-id",
+            appId: "your-app-id"
         };
 
         // Initialize Firebase
@@ -124,28 +107,24 @@
         const db = getFirestore(app);
 
         let currentList = 'urgent'; // Default list
-        let lastDeletedTask;
-        let lastDeletedIndex;
-        
 
-      document.addEventListener('DOMContentLoaded', async function() {
-          document.querySelectorAll('.list-btn').forEach(button => {
-              button.addEventListener('click', async function() {
-                  document.querySelectorAll('.list-btn').forEach(btn => btn.classList.remove('selected'));
-                  this.classList.add('selected');
-                  currentList = this.getAttribute('data-list');
-                  document.getElementById('tasksList').innerHTML = '';
-                  await loadTasks(currentList);
-              });
-          });
+        document.addEventListener('DOMContentLoaded', async function() {
+            document.querySelectorAll('.list-btn').forEach(button => {
+                button.addEventListener('click', async function() {
+                    document.querySelectorAll('.list-btn').forEach(btn => btn.classList.remove('selected'));
+                    this.classList.add('selected');
+                    currentList = this.getAttribute('data-list');
+                    document.getElementById('tasksList').innerHTML = '';
+                    await loadTasks(currentList);
+                });
+            });
 
-          // Select the default "urgent" button
-          const defaultButton = document.querySelector('[data-list="urgent"]');
-          defaultButton.classList.add('selected'); // Add the 'selected' class
-          currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
-          await loadTasks(currentList); // Load the default "urgent" list tasks
-      });
-      
+            // Select the default "urgent" button
+            const defaultButton = document.querySelector('[data-list="urgent"]');
+            defaultButton.classList.add('selected'); // Add the 'selected' class
+            currentList = defaultButton.getAttribute('data-list'); // Set the currentList to 'urgent'
+            await loadTasks(currentList); // Load the default "urgent" list tasks
+        });
 
         document.getElementById('addTask').addEventListener('click', async function() {
             const newTaskValue = document.getElementById('newTask').value;
@@ -158,7 +137,8 @@
         async function addTask(taskContent, crossedOff, save = false) {
             const tasksList = document.getElementById('tasksList');
             const newTask = document.createElement('li');
-            newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
+            newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center
+                            newTask.className = 'bg-white p-2 mt-2 cursor-pointer flex items-center justify-between';
             const btnGroup = document.createElement('div');
             btnGroup.className = 'flex items-center mr-2';
 
@@ -250,3 +230,4 @@
     </script>
 </body>
 </html>
+
