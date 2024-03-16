@@ -175,10 +175,15 @@
                 save && saveTasks(currentList); // Save the tasks after toggling cross-off state
             });
 
-            const deleteBtn = createButton('Del', 'del-btn', function() {
-                newTask.remove();
-                save && saveTasks(currentList); // Save the tasks
-            });
+           const deleteBtn = createButton('Del', 'del-btn', function() {
+    lastDeletedTask = newTask.remove();
+    const index = Array.from(tasksList.children).indexOf(newTask);
+    if (index !== -1) {
+        tasks.splice(index, 1); // Remove the task from the tasks array
+        saveTasks(currentList); // Save the updated tasks list
+    }
+});
+
 
             // Add text content and buttons to the task element
             const taskText = document.createElement('span');
