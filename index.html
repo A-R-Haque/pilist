@@ -74,12 +74,27 @@
     align-items: center;
     padding: 0;
 }
+.button-container {
+    overflow-x: auto; /* Horizontal scroll */
+    overflow-y: auto; /* Vertical scroll */
+    white-space: nowrap; /* Prevent buttons from wrapping */
+}
 
-@media screen and (max-width: 768px) { /* Adjust max-width as needed */
-    .btn {
-        width: 25px; /* Smaller width for smaller screens */
-        height: 25px; /* Smaller height for smaller screens */
-    }
+.button-container::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+}
+
+.button-container::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Track color */
+}
+
+.button-container::-webkit-scrollbar-thumb {
+    background: #888; /* Thumb color */
+}
+
+/* Optional: Hide scrollbar when not hovering over the container */
+.button-container:hover::-webkit-scrollbar-thumb {
+    background: #555; /* Change thumb color on hover */
 }
         
     </style>
