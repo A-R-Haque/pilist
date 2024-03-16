@@ -66,7 +66,22 @@
         .task-text {
             flex-grow: 1;
             margin-left: 10px;
-        }
+        }.btn {
+    width: 30px; /* Default width */
+    height: 30px; /* Default height */
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+@media screen and (max-width: 768px) { /* Adjust max-width as needed */
+    .btn {
+        width: 25px; /* Smaller width for smaller screens */
+        height: 25px; /* Smaller height for smaller screens */
+    }
+}
+        
     </style>
 </head>
 <body>
