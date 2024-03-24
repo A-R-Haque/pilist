@@ -217,7 +217,7 @@
                 save && saveTasks(currentList); // Save the tasks after toggling cross-off state
             });
 
-            const deleteBtn = createButton('Delete', 'del-btn', function() {
+            const deleteBtn = createButton('DEL', 'del-btn', function() {
                 lastDeletedTask =                 newTask.remove();
                 saveTasks(currentList); // Assume we always want to save the state after a delete.
             });
