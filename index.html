@@ -226,7 +226,8 @@
             const taskText = document.createElement('span');
             taskText.textContent = taskContent;
             taskText.className = 'task-text';
-            btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
+            //btnGroup.append(moveUpBtn, moveDownBtn, crossOffBtn, deleteBtn);
+            btnGroup.append(deleteBtn);
             newTask.append(btnGroup, taskText);
             tasksList.appendChild(newTask);
 
